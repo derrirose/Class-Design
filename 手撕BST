@@ -1,0 +1,103 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include<iostream>
+#include<string.h>
+using namespace std;
+
+struct BSTNode
+{
+	int data;
+	struct BSTNode* left;
+	struct BSTNode* right;
+};
+
+void Insert(BSTNode*& Root, int key)
+{
+	if (!Root)
+	{
+		Root = new BSTNode();
+		Root->data = key;
+		Root->left = nullptr;
+		Root->right = nullptr;
+	}
+	else if (key < Root->data)
+		Insert(Root->left, key);
+	else if (key > Root->data)
+		 Insert(Root->right, key);
+}
+
+void Delete(BSTNode* &tree, int key)
+{
+	if (tree==nullptr)
+		return;
+	if (key > tree->data)
+		Delete(tree->right, key);
+	else if (key < tree->data)
+		Delete(tree->left, key);
+	else if(tree->left && tree->right)
+	{		
+			BSTNode* tmp1, * tmp;	
+			tmp1 = tree;
+			tmp = tree->right;
+			while (tmp->left)		
+			{
+				tmp1 = tmp;
+				tmp = tmp->left;
+			}
+			tree->data = tmp->data;
+			if (tmp1 == tree)
+				tmp1->right = tmp->right;	
+			else
+				tmp1->left = tmp->right;						
+	}
+	else
+	{
+		BSTNode* tmp2 = tree;
+		tree = (tree->left) ? tree->left : tree->right;
+	}
+}
+
+void midOrderTraverse(BSTNode* tree)
+{
+	if (tree==nullptr)
+		return;
+	midOrderTraverse(tree->left);
+	cout << tree->data << " ";
+	midOrderTraverse(tree->right);
+}
+
+void preOrderTraverse(BSTNode* tree)
+{
+	if (tree==nullptr)
+		return;
+	cout << tree->data << " ";
+	preOrderTraverse(tree->left);
+	preOrderTraverse(tree->right);
+}
+
+int main()
+{
+	int cnt = 0;
+	cin >> cnt;
+	int a = 0;
+	BSTNode* tree = nullptr;
+	char Input[100];
+	for (int i = 0; i < cnt; i++)
+	{
+		cin >> Input;
+		if (!strcmp(Input, "Insert"))
+		{
+			scanf("%d", &a);
+			Insert(tree, a);
+		}
+		else
+		{
+			scanf("%d", &a);
+			Delete(tree, a);
+		}
+	}
+	midOrderTraverse(tree);
+	cout << endl;
+	cout << endl;
+	preOrderTraverse(tree);
+	return 0;
+}
