@@ -1,0 +1,137 @@
+#include<iostream>
+using namespace std;
+
+int flag;
+
+struct WordNode
+{
+    string word;
+    WordNode* ChildOrd[20];
+    int freq;
+};
+
+WordNode* MaxFreq;//最可能节点
+
+int Dist(string str1, string str2)
+{
+    int len1 = str1.length();
+    int len2 = str2.length();
+    int i = 0;
+    int j = 0;
+    int dist[20][20] = {0};
+    i = 0;
+    while (i <= len1)
+    {
+        dist[i][0] = i;
+        i++;
+    }
+    i = 0;
+    while (i <= len2)
+    {
+        dist[0][i] = i;
+        i++;
+    }
+    i = 1;
+    while (i <= len1)
+    {
+        j = 1;
+        while (j <= len2)
+        {
+            if (str1[i - 1] == str2[j - 1])
+                dist[i][j] = dist[i - 1][j - 1];
+            else
+            {
+                dist[i][j] = min(dist[i - 1][j - 1], min(dist[i - 1][j], dist[i][j - 1])) + 1;
+            }
+            j++;
+        }
+        i++;
+    }
+    return dist[len1][len2];
+}
+
+void insert(string str, int freq, WordNode*& W)
+{
+    if (!W)
+    {
+        W = new WordNode();
+        W->word = str;
+        W->freq = freq;
+        int i = 0;
+        while (i < 20)
+        {
+            W->ChildOrd[i] = nullptr;
+            i++;
+        }
+        return;
+    }//建根节点
+    int dis = Dist(str, W->word);
+    insert(str, freq, W->ChildOrd[dis]);//根据dis递归插入节点
+    return;
+}
+
+void Find(WordNode* root, string S, int d)
+{
+    if (!root)
+        return;
+    int dist = 0;
+    dist = Dist(root->word, S);
+    if (dist == 0)
+    {
+        MaxFreq = root;
+        flag = 1;
+        return;
+    }
+    else if (dist <= d)
+    {
+        if (!MaxFreq)
+            MaxFreq = root;
+        else if (root->freq > MaxFreq->freq)
+            MaxFreq = root;
+        else if (root->freq == MaxFreq->freq)
+            if (root->word < MaxFreq->word)
+                MaxFreq = root;
+    }
+    for (int i = dist - d; i <= dist + d; i++)
+    {
+        if (i <= 0 || i >= 20)
+            continue;
+        Find(root->ChildOrd[i], S, d);
+        if (flag)
+            return;
+    }
+}
+
+int main()
+{
+    int n = 0;
+    int m = 0;
+    int d = 0;
+    int freq = 0;
+    string tmp;
+    WordNode* Wroot = new WordNode();
+    scanf("%d%d%d", &n, &m, &d);
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%lld", &freq);
+        cin >> tmp;
+        insert(tmp, freq, Wroot);//调用insert递归加入节点
+    }
+    int i = 0;
+    while (i < m)
+    {
+        flag = 0;
+        string tmpstr;
+        cin >> tmpstr;
+        MaxFreq = nullptr;
+        Find(Wroot, tmpstr, d);
+        if (!MaxFreq)
+        {
+            cout << "No similar word in dictionary" << endl;
+        }
+        else cout << MaxFreq->word << endl;
+        i++;
+    }
+    return 0;
+}
+
